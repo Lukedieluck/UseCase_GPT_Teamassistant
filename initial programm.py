@@ -15,7 +15,7 @@ def chat_with_gpt(messages):
     return response.choices[0].message.content
 
 if __name__ == "__main__":
-    user_message = {"role": "user", "content": "Hallo, wie geht's?"}
+    user_message = {"role": "user", "content": "Mir gehts gut?"}
     reply = chat_with_gpt([user_message])
     print("GPT:", reply)
 
