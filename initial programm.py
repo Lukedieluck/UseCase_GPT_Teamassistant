@@ -1,6 +1,8 @@
-import os
+from prompting import PromptTemplate
+import os 
 from dotenv import load_dotenv
 import openai
+
 
 # Umgebungsvariablen laden
 load_dotenv()
