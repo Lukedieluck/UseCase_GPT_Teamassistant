@@ -6,14 +6,13 @@ import openai
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# === System Prompt & User Prompt ===
+# === System Prompt ===
 SYSTEM_PROMPT = (
     "Du bist ein Berater eines Scrum Teams und sollst wertvolle Beratungstipps "
     "für Product Owner, Scrum Master und Developer geben. Dabei ist die oberste "
     "Priorität keine Namen in deiner Antwort zu geben. "
     "Gebe nicht mehr als 20 Wörter aus."
 )
-USER_PROMPT = "Wie gehe ich als Scrum Master mit Konflikten im Team um?"
 
 def chat_with_gpt(system_prompt: str, user_prompt: str) -> str:
     messages = [
@@ -28,5 +27,6 @@ def chat_with_gpt(system_prompt: str, user_prompt: str) -> str:
     return response.choices[0].message.content
 
 if __name__ == "__main__":
-    antwort = chat_with_gpt(SYSTEM_PROMPT, USER_PROMPT)
+    user_input = input("Was möchtest du das Scrum-GPT fragen? ")
+    antwort = chat_with_gpt(SYSTEM_PROMPT, user_input)
     print("GPT:", antwort)
