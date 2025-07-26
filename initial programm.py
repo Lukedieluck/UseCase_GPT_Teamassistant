@@ -10,7 +10,9 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 SYSTEM_PROMPT = (
-    "Du bist ein Berater eines Scrum-Teams."
+    "Du bist ein Berater eines Scrum-Teams. Bitte maximal nur 40 Wörter ausgeben. "
+    "Bevorzuge die Inhalte die dir zugetragen wurde und versuche dein trainiertes Wissen aus dem Internet nur dann einzufügen "
+    ",wenn du kein anderes Wissen findest."
 )
 
 def chat_with_gpt(system_prompt: str, user_prompt: str) -> str:
@@ -175,7 +177,6 @@ window.onload = function() {
 """
 
 
-
 @app.route("/", methods=["GET", "POST"])
 def index():
     antwort = None
@@ -195,5 +196,11 @@ def index():
 
     return render_template_string(TEMPLATE, antwort=antwort, team_antwort=team_antwort)
 
+
+
+# Debugging: Alle Einträge in der VDB ausgeben:
+from vdb_helper import print_all_entries
 if __name__ == "__main__":
+    print_all_entries()  # ← Das zeigt dir alle gespeicherten Einträge im Terminal
     app.run(debug=True)
+

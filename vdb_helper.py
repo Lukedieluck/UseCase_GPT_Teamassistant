@@ -35,3 +35,22 @@ def get_last_entries(n=5):
     docs = vectordb.similarity_search("Stimmung", k=n)
     # Gibt die Texte der letzten n Einträge zurück
     return [doc.page_content for doc in docs]
+
+# Funktion: Liefert die Collection aus der VDB (wird z. B. für Debugging benötigt)
+def get_collection():
+    vectordb = Chroma(
+        collection_name=COLLECTION,
+        persist_directory=VDB_DIR,
+        embedding_function=embeddings
+    )
+    return vectordb
+
+
+# Funktion: Alle Einträge ausgeben welche in der VDB gespeichert sind (für Debugging)
+def print_all_entries():
+    collection = get_collection()
+    results = collection.get()
+    print("\n📋 Aktuelle Einträge in der VDB:\n" + "-"*35)
+    for i, doc in enumerate(results['documents']):
+        print(f"{i+1}. {doc}")
+
