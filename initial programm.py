@@ -2,6 +2,8 @@ import os
 from dotenv import load_dotenv
 import openai
 from flask import Flask, render_template_string, request
+from vdb_helper import save_entry, get_last_entries
+
 
 # Umgebungsvariablen laden
 load_dotenv()
@@ -182,11 +184,14 @@ def index():
     if request.method == "POST":
         if request.form.get("user_prompt"):
             user_prompt = request.form["user_prompt"]
+            # Speichere anonymisiert in der VDB
+            save_entry("Team", user_prompt)
             antwort = chat_with_gpt(SYSTEM_PROMPT, user_prompt)
         elif request.form.get("team_check"):
-            # Platzhalter für spätere VDB-Anbindung
-            fake_summary = "Das Team ist aktuell motiviert, aber leicht gestresst."
-            team_antwort = chat_with_gpt(SYSTEM_PROMPT, f"Wie ist die Stimmung im Team? Aktuell: {fake_summary}")
+            # Hole die letzten 5 Team-Feedbacks
+            last_entries = get_last_entries(5)
+            context = "\n".join(last_entries)
+            team_antwort = chat_with_gpt(SYSTEM_PROMPT, f"Wie ist die Stimmung im Team? Stehe dem Team als Berater zur Seite. Kontext:\n{context}")
 
     return render_template_string(TEMPLATE, antwort=antwort, team_antwort=team_antwort)
 

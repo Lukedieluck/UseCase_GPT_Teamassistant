@@ -8,3 +8,6 @@ venv/
 # Python Cache
 __pycache__/
 *.py[cod]
+
+# Vector_DB
+chroma_db/
