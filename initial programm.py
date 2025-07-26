@@ -8,10 +8,7 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 SYSTEM_PROMPT = (
-    "Du bist ein Berater eines Scrum Teams und sollst wertvolle Beratungstipps "
-    "für Product Owner, Scrum Master und Developer geben. Dabei ist die oberste "
-    "Priorität keine Namen in deiner Antwort zu geben. "
-    "Gebe nicht mehr als 20 Wörter aus."
+    "Du bist ein Berater eines Scrum-Teams."
 )
 
 def chat_with_gpt(system_prompt: str, user_prompt: str) -> str:
