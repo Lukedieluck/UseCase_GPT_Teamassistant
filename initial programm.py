@@ -4,7 +4,6 @@ import openai
 from flask import Flask, render_template_string, request
 from vdb_helper import save_entry, get_last_entries
 
-
 # Umgebungsvariablen laden
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -33,7 +32,7 @@ TEMPLATE = """
 <!doctype html>
 <html lang="de">
 <head>
-<title>Scrum Team Assistant</title>
+<title>Scrum GPT-Team-Assistant</title>
 <style>
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
@@ -43,7 +42,7 @@ body {
     padding: 0;
 }
 .container {
-    max-width: 560px;
+    max-width: 650px;
     margin: 35px auto;
     background: #fff;
     border-radius: 15px;
@@ -51,131 +50,103 @@ body {
     padding: 36px 40px 28px 40px;
 }
 h2 {
-    color: #3382f7;
+    color: #000;
     margin-bottom: 18px;
 }
 label {
-    font-size: 1.11em;
+    font-size: 1.1em;
     color: #333;
+    display: block;
+    margin-bottom: 10px;
 }
-input[type=text], textarea {
-    padding: 10px;
-    border: 1.5px solid #bcd7ff;
-    border-radius: 8px;
-    width: 98%%;
-    margin-top: 7px;
-    margin-bottom: 12px;
-    font-size: 1.05em;
-    background: #f6fbff;
+textarea {
+    padding: 16px;
+    border: 2px solid #a0c4ff;
+    border-radius: 15px;
+    width: 100%;
+    height: 120px;
+    font-size: 1.1em;
+    background: #e3f2fd;
+    font-style: italic;
+    color: #555;
+    resize: vertical;
+    box-sizing: border-box;
+}
+textarea:focus {
+    font-style: normal;
+    color: #000;
 }
 input[type=submit], button {
-    background: linear-gradient(90deg, #2560c0 60%%, #3382f7 100%%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 25px;
+    background: #e3f2fd;
+    color: #000;
+    border: 2px solid #000;
+    border-radius: 10px;
+    padding: 10px 20px;
     font-size: 1.1em;
     font-weight: bold;
-    margin-top: 2px;
     cursor: pointer;
-    box-shadow: 0 1px 5px #3382f730;
-    transition: background .18s;
-    opacity: 1;
-}
-input[type=submit]:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-input[type=submit]:hover:enabled, button:hover {
-    background: linear-gradient(90deg, #1560bd 40%%, #44d7b6 100%%);
+    margin-left: 10px;
 }
 hr {
-    margin: 28px 0 22px 0;
+    margin: 30px 0;
     border: none;
-    border-top: 1.5px solid #f1f5fb;
-}
-.info {
-    color: #666;
-    font-size: 0.99em;
-    margin-bottom: 7px;
-}
-.vdb-preview {
-    background: #e6f2ff;
-    border-left: 4px solid #3382f7;
-    color: #224970;
-    padding: 8px 13px;
-    margin-bottom: 17px;
-    border-radius: 7px;
-    font-size: 1.05em;
+    border-top: 2px solid #ccc;
 }
 .result-box {
     background: #f6fbff;
     border-left: 4px solid #8fd1ff;
     padding: 10px 17px;
     border-radius: 7px;
-    margin-top: 6px;
+    margin-top: 10px;
     font-size: 1.08em;
 }
 .result-title {
     margin-bottom: 5px;
     color: #3382f7;
-}
-#team_btn {
-    background: linear-gradient(90deg, #1a437c 40%%, #3382f7 100%%);
-    color: white;
     font-weight: bold;
-    opacity: 1;
 }
-#team_btn:active, #team_btn:hover {
-    background: linear-gradient(90deg, #1560bd 40%%, #44d7b6 100%%);
+.info {
+    margin-top: 15px;
+    font-size: 0.95em;
+    color: #666;
+    font-style: italic;
 }
 </style>
 </head>
 <body>
 <div class="container">
-    <h2>🤖 Scrum GPT Team-Assistant</h2>
-    <form method=post>
-      <label>Deine Stimmung, Anmerkungen, Verbesserungsvorschläge, Beschwerden an das Team:</label>
-      <textarea name="user_prompt" id="user_prompt" rows="3" oninput="updateVdbPreview(); checkSubmitBtn();"></textarea>
-      <input type=submit value="Absenden" id="submit_btn" disabled>
+    <h2>🤖 <b>Scrum GPT-Team-Assistant</b></h2>
+    <form method="POST">
+        <label>Wie ist deine Stimmung heute oder was möchtest du heute an dein Team loswerden?:</label>
+        <textarea name="user_prompt" id="user_prompt" placeholder="Was du hier eingibst, wird gespeichert und hilft deinem Team sich zu verbessern und auf deine Anmerkungen besser eingehen zu können." oninput="checkSubmitBtn();"></textarea>
+        <input type="submit" value="Senden" id="submit_btn" disabled>
     </form>
-    <div class="info">
-      <i>Was du oben eingibst, siehst du hier als Vorschau (wird später in der Vector DB gespeichert):</i>
-    </div>
-    <div class="vdb-preview">
-      <b id="vdb_preview"></b>
-    </div>
     {% if antwort %}
-      <div class="result-title">GPT Antwort:</div>
-      <div class="result-box">{{ antwort }}</div>
+        <div class="result-title">GPT Antwort:</div>
+        <div class="result-box">{{ antwort }}</div>
     {% endif %}
     <hr>
-    <form method=post>
-      <button name="team_check" value="1" id="team_btn" type="submit">🚦 Teamstimmung abfragen</button>
+    <p><i>Teamstimmung abfragen und mit GPT-Team-Assistant darüber austauschen:</i></p>
+    <form method="POST">
+        <button name="team_check" value="1">Teamstimmung abfragen</button>
     </form>
     {% if team_antwort %}
-      <div class="result-title">GPT Teamstimmung:</div>
-      <div class="result-box">{{ team_antwort }}</div>
+        <div class="result-title">GPT Teamstimmung:</div>
+        <div class="result-box">{{ team_antwort }}</div>
     {% endif %}
 </div>
 <script>
-function updateVdbPreview() {
-    document.getElementById("vdb_preview").innerText =
-        document.getElementById("user_prompt").value;
-}
 function checkSubmitBtn() {
     let txt = document.getElementById("user_prompt").value.trim();
     document.getElementById("submit_btn").disabled = (txt === "");
 }
 window.onload = function() {
-    updateVdbPreview();
     checkSubmitBtn();
 }
 </script>
 </body>
 </html>
 """
-
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -187,7 +158,7 @@ def index():
             user_prompt = request.form["user_prompt"]
             # Speichere anonymisiert in der VDB
             save_entry("Team", user_prompt)
-            antwort = chat_with_gpt(SYSTEM_PROMPT, user_prompt)
+            antwort = "✅ Deine Anmerkungen wurden in der Team-Datenbank erfolgreich aufgenommen. Vielen Dank für deinen Beitrag!"
         elif request.form.get("team_check"):
             # Hole die letzten 5 Team-Feedbacks
             last_entries = get_last_entries(5)
@@ -196,11 +167,7 @@ def index():
 
     return render_template_string(TEMPLATE, antwort=antwort, team_antwort=team_antwort)
 
-
-
-# Debugging: Alle Einträge in der VDB ausgeben:
 from vdb_helper import print_all_entries
 if __name__ == "__main__":
-    print_all_entries()  # ← Das zeigt dir alle gespeicherten Einträge im Terminal
+    print_all_entries()
     app.run(debug=True)
-
