@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 import openai
-from flask import Flask, render_template_string, request
+from flask import Flask, render_template_string, request, session
 from vdb_helper import save_entry, get_last_entries
 
 # Umgebungsvariablen laden
@@ -10,15 +10,19 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 SYSTEM_PROMPT = (
     "Du bist ein Berater eines Scrum-Teams. Bitte maximal nur 40 Wörter ausgeben. "
-    "Bevorzuge die Inhalte die dir zugetragen wurde und versuche dein trainiertes Wissen aus dem Internet nur dann einzufügen "
-    ",wenn du kein anderes Wissen findest."
+    "Bevorzuge die Inhalte die dir zugetragen wurde und versuche dein trainiertes Wissen aus dem Internet nur dann einzufügen, "
+    "wenn du kein anderes Wissen findest."
 )
 
-def chat_with_gpt(system_prompt: str, user_prompt: str) -> str:
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user",   "content": user_prompt},
-    ]
+def chat_with_gpt(system_prompt: str, messages) -> str:
+    # messages: Liste oder String
+    if isinstance(messages, str):
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user",   "content": messages},
+        ]
+    else:
+        messages = [{"role": "system", "content": system_prompt}] + messages
     response = openai.chat.completions.create(
         model="gpt-4.1-nano",
         messages=messages,
@@ -27,6 +31,7 @@ def chat_with_gpt(system_prompt: str, user_prompt: str) -> str:
     return response.choices[0].message.content
 
 app = Flask(__name__)
+app.secret_key = "dein_supergeheimer_key"  # Wichtig für Session
 
 TEMPLATE = """
 <!doctype html>
@@ -111,6 +116,15 @@ hr {
     color: #666;
     font-style: italic;
 }
+.chat-box {
+    margin-top: 20px;
+}
+.chat-message {
+    margin-bottom: 10px;
+}
+.chat-message span {
+    font-weight: bold;
+}
 </style>
 </head>
 <body>
@@ -133,6 +147,19 @@ hr {
     {% if team_antwort %}
         <div class="result-title">GPT Teamstimmung:</div>
         <div class="result-box">{{ team_antwort }}</div>
+        <form method="POST">
+            <input type="hidden" name="continue_chat" value="1">
+            <textarea name="follow_up" placeholder="Frage zu dieser Teamstimmung..." style="width:100%;height:60px;margin-top:10px;"></textarea>
+            <input type="submit" value="Absenden">
+        </form>
+    {% endif %}
+    {% if chat_history %}
+        <div style="margin-top:15px;">
+        {% for msg in chat_history %}
+            <div><b>Du:</b> {{ msg["user"] }}</div>
+            <div><b>GPT:</b> {{ msg["gpt"] }}</div>
+        {% endfor %}
+        </div>
     {% endif %}
 </div>
 <script>
@@ -153,21 +180,57 @@ def index():
     antwort = None
     team_antwort = None
 
+    # Lade Chatverlauf aus Session (oder leeres Array)
+    chat_history = session.get('chat_history', [])
+
     if request.method == "POST":
         if request.form.get("user_prompt"):
             user_prompt = request.form["user_prompt"]
-            # Speichere anonymisiert in der VDB
             save_entry("Team", user_prompt)
             antwort = "✅ Deine Anmerkungen wurden in der Team-Datenbank erfolgreich aufgenommen. Vielen Dank für deinen Beitrag!"
+            session.pop('chat_history', None)  # Verlauf resetten
+
         elif request.form.get("team_check"):
-            # Hole die letzten 5 Team-Feedbacks
             last_entries = get_last_entries(5)
             context = "\n".join(last_entries)
-            team_antwort = chat_with_gpt(SYSTEM_PROMPT, f"Wie ist die Stimmung im Team? Stehe dem Team als Berater zur Seite. Kontext:\n{context}")
+            user_message = "Wie ist die Stimmung im Team?"
+            # An GPT geht die Frage plus Kontext, im Chat nur die Frage!
+            gpt_answer = chat_with_gpt(
+                SYSTEM_PROMPT,
+                [
+                    {"role": "user", "content": f"{user_message} Kontext:\n{context}"}
+                ]
+            )
+            chat_history = [{"user": user_message, "gpt": gpt_answer}]
+            session['chat_history'] = chat_history
+            team_antwort = gpt_answer
 
-    return render_template_string(TEMPLATE, antwort=antwort, team_antwort=team_antwort)
+        elif request.form.get("continue_chat"):
+            follow_up = request.form.get("follow_up", "")
+            # Nachrichtenverlauf für GPT bauen
+            messages = []
+            for pair in chat_history:
+                messages.append({"role": "user", "content": pair["user"]})
+                messages.append({"role": "assistant", "content": pair["gpt"]})
+            messages.append({"role": "user", "content": follow_up})
+            gpt_reply = chat_with_gpt(SYSTEM_PROMPT, messages[1:])  # [1:] überspringt system (fügt Funktion oben wieder hinzu)
+            chat_history.append({"user": follow_up, "gpt": gpt_reply})
+            session['chat_history'] = chat_history
+            team_antwort = None  # Nur Verlauf anzeigen
 
-from vdb_helper import print_all_entries
+    # Teamantwort (letzte GPT-Antwort im Verlauf)
+    if 'chat_history' in session and session['chat_history']:
+        if not team_antwort:
+            team_antwort = session['chat_history'][-1]['gpt']
+
+    return render_template_string(
+        TEMPLATE,
+        antwort=antwort,
+        team_antwort=team_antwort,
+        chat_history=chat_history if chat_history else None
+    )
+
 if __name__ == "__main__":
+    from vdb_helper import print_all_entries
     print_all_entries()
     app.run(debug=True)
