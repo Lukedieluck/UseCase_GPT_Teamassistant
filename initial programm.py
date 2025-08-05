@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import openai
 from flask import Flask, render_template_string, request, session
 from vdb_helper import save_entry, get_last_entries
+from sentiment_dashboard import get_team_sentiment_dashboard  # Wichtig: import hier
 
 # Umgebungsvariablen laden
 load_dotenv()
@@ -15,7 +16,6 @@ SYSTEM_PROMPT = (
 )
 
 def chat_with_gpt(system_prompt: str, messages) -> str:
-    # messages: Liste oder String
     if isinstance(messages, str):
         messages = [
             {"role": "system", "content": system_prompt},
@@ -31,7 +31,7 @@ def chat_with_gpt(system_prompt: str, messages) -> str:
     return response.choices[0].message.content
 
 app = Flask(__name__)
-app.secret_key = "dein_supergeheimer_key"  # Wichtig für Session
+app.secret_key = "dein_supergeheimer_key"
 
 TEMPLATE = """
 <!doctype html>
@@ -144,6 +144,12 @@ hr {
     <form method="POST">
         <button name="team_check" value="1">Teamstimmung abfragen</button>
     </form>
+    {% if dash_img %}
+        <div style="margin-bottom:20px;">
+            <img src="data:image/png;base64,{{ dash_img }}" style="width:250px;">
+            <br><small>Teamstimmungsbarometer (letzte 5 Einträge)</small>
+        </div>
+    {% endif %}
     {% if team_antwort %}
         <div class="result-title">GPT Teamstimmung:</div>
         <div class="result-box">{{ team_antwort }}</div>
@@ -180,7 +186,6 @@ def index():
     antwort = None
     team_antwort = None
 
-    # Lade Chatverlauf aus Session (oder leeres Array)
     chat_history = session.get('chat_history', [])
 
     if request.method == "POST":
@@ -188,13 +193,12 @@ def index():
             user_prompt = request.form["user_prompt"]
             save_entry("Team", user_prompt)
             antwort = "✅ Deine Anmerkungen wurden in der Team-Datenbank erfolgreich aufgenommen. Vielen Dank für deinen Beitrag!"
-            session.pop('chat_history', None)  # Verlauf resetten
+            session.pop('chat_history', None)  # Verlauf zurücksetzen
 
         elif request.form.get("team_check"):
             last_entries = get_last_entries(5)
             context = "\n".join(last_entries)
             user_message = "Wie ist die Stimmung im Team?"
-            # An GPT geht die Frage plus Kontext, im Chat nur die Frage!
             gpt_answer = chat_with_gpt(
                 SYSTEM_PROMPT,
                 [
@@ -207,18 +211,21 @@ def index():
 
         elif request.form.get("continue_chat"):
             follow_up = request.form.get("follow_up", "")
-            # Nachrichtenverlauf für GPT bauen
             messages = []
             for pair in chat_history:
                 messages.append({"role": "user", "content": pair["user"]})
                 messages.append({"role": "assistant", "content": pair["gpt"]})
             messages.append({"role": "user", "content": follow_up})
-            gpt_reply = chat_with_gpt(SYSTEM_PROMPT, messages[1:])  # [1:] überspringt system (fügt Funktion oben wieder hinzu)
+            gpt_reply = chat_with_gpt(SYSTEM_PROMPT, messages[1:])
             chat_history.append({"user": follow_up, "gpt": gpt_reply})
             session['chat_history'] = chat_history
-            team_antwort = None  # Nur Verlauf anzeigen
+            team_antwort = None
 
-    # Teamantwort (letzte GPT-Antwort im Verlauf)
+    # --- WICHTIG: Nur echte Team-Feedbacks fürs Barometer! ---
+    last_entries = get_last_entries(5)
+    dash_img, dash_avg = get_team_sentiment_dashboard(last_entries)
+    # ---------------------------------------------------------
+
     if 'chat_history' in session and session['chat_history']:
         if not team_antwort:
             team_antwort = session['chat_history'][-1]['gpt']
@@ -227,7 +234,8 @@ def index():
         TEMPLATE,
         antwort=antwort,
         team_antwort=team_antwort,
-        chat_history=chat_history if chat_history else None
+        chat_history=chat_history if chat_history else None,
+        dash_img=dash_img
     )
 
 if __name__ == "__main__":

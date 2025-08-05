@@ -32,9 +32,19 @@ def get_last_entries(n=5):
         persist_directory=VDB_DIR,
         embedding_function=embeddings
     )
-    docs = vectordb.similarity_search("Stimmung", k=n)
-    # Gibt die Texte der letzten n Einträge zurück
-    return [doc.page_content for doc in docs]
+    # Hole alle Einträge inkl. Metadaten
+    results = vectordb.get()
+    docs = results['documents']
+    metadatas = results['metadatas']
+    # Sortiere nach Zeitstempel absteigend
+    sorted_entries = sorted(
+        zip(docs, metadatas),
+        key=lambda x: x[1]['timestamp'],
+        reverse=True
+    )
+    # Gib die letzten n zurück
+    return [doc for doc, meta in sorted_entries[:n]]
+
 
 # Funktion: Liefert die Collection aus der VDB (wird z. B. für Debugging benötigt)
 def get_collection():
