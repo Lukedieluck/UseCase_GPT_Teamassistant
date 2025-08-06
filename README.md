@@ -4,6 +4,8 @@ This project is a **proof of concept (POC)** to demonstrate a lightweight AI-bas
 
 The main goal was to test how user input can be stored, analyzed, requested and visualized to gain insights into team mood and dynamics.
 
+This POC is an ongoing project. Updates will follow.
+
 
 ## 🔧 Features
 
