@@ -22,10 +22,46 @@ The main goal was to test how user input can be stored, analyzed, requested and 
 - Built-in safety: deletion actions require `--yes` confirmation
 
 ---
+### 3. 🧪 Tech Stack
+Python 3.10+
+
+Flask
+
+OpenAI API
+
+LangChain
+
+ChromaDB (local vector store)
+
+HuggingFace Embeddings (MiniLM-L6-v2)
+
+---
+### 4. Screenshot (POC)
+
+<img width="709" height="1113" alt="image" src="https://github.com/user-attachments/assets/aa3f82af-9317-40a5-9f47-9b534efc5442" />
+
+
+
+
+
+### 5. 🔭 Outlook / Future Ideas
+🛡️ Migrate deprecated LangChain components to langchain-chroma and langchain-huggingface
+
+💾 Add automatic backup/export function before deletion
+
+🖼️ Enhance the UI with better design (charts, emojis, etc.)
+
+📬 Add email or Slack notifications for sentiment alerts
+
+📚 Enhance the Vector DB entries to analyze patterns and insights into the team mood
+
+📈 Store long-term sentiment trends and visualize them
+
+---
 
 ## 🧪 Disclaimer
 
-> ⚠️ This project is a **POC only** – not designed for production use.
+⚠️ This project is a **POC only** – not designed for production use.
 
 - No authentication or authorization
 - No logging or auditing
