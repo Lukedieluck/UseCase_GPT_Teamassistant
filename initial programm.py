@@ -31,7 +31,7 @@ def chat_with_gpt(system_prompt: str, messages) -> str:
     return response.choices[0].message.content
 
 app = Flask(__name__)
-app.secret_key = "dein_supergeheimer_key"
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "debug-key")
 
 TEMPLATE = """
 <!doctype html>
