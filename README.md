@@ -43,10 +43,13 @@ HuggingFace Embeddings (MiniLM-L6-v2)
 <img width="709" height="1113" alt="image" src="https://github.com/user-attachments/assets/aa3f82af-9317-40a5-9f47-9b534efc5442" />
 
 
+### 5. Prompting
+Already implement:
+
+chain-of-thougts, temperature = 0.3, neutralisation
 
 
-
-### 5. 🔭 Outlook / Future Ideas
+### 6. 🔭 Outlook / Future Ideas
 🛡️ Migrate deprecated LangChain components to langchain-chroma and langchain-huggingface
 
 💾 Add automatic backup/export function before deletion
@@ -58,6 +61,8 @@ HuggingFace Embeddings (MiniLM-L6-v2)
 📚 Enhance the Vector DB entries to analyze patterns and insights into the team mood
 
 📈 Store long-term sentiment trends and visualize them
+
+📦 Try other GPT-Models
 
 ---
 
