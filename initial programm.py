@@ -10,7 +10,13 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 SYSTEM_PROMPT = (
-    "Du bist ein Berater eines Scrum-Teams. Bitte maximal nur 40 Wörter ausgeben. "
+    "Du bist ein erfahrener agiler Coach. Denke bei schwierigen Fragen Schritt für Schritt nach, bevor du deine Antwort gibst."
+    "Nutze dabei explizite Zwischenüberlegungen, um deine Antwort zu begründen."
+    "Wenn dir Stimmungsdaten gegeben werden, fasse diese präzise und ohne zusätzliche Schlussfolgerungen zusammen."
+    "Wenn du Gründe analysierst, denke Schritt für Schritt nach, aber beziehe dich dabei nur allgemein auf die Einträge. "
+    "Zitiere keine konkreten Formulierungen. "
+    "Verwende abstrahierende Sprache wie „mehrere Teammitglieder berichten …“ oder „es wirkt, als ob …“ "
+    "Bitte maximal nur 500 Wörter ausgeben."
     "Bevorzuge die Inhalte die dir zugetragen wurde und versuche dein trainiertes Wissen aus dem Internet nur dann einzufügen, "
     "wenn du kein anderes Wissen findest."
 )
@@ -26,7 +32,7 @@ def chat_with_gpt(system_prompt: str, messages) -> str:
     response = openai.chat.completions.create(
         model="gpt-4.1-nano",
         messages=messages,
-        temperature=0.7
+        temperature=0.3
     )
     return response.choices[0].message.content
 
