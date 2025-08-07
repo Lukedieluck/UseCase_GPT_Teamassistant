@@ -62,7 +62,7 @@ def get_team_sentiment_dashboard(entries):
 
     fig, ax = plt.subplots(figsize=(4, 2))
     ax.barh(0, 1, left=-2, color='#e33535', height=0.5)   # rot
-    ax.barh(0, 1, left=-1, color='#ff7f0e', height=0.5)   # orange
+    ax.barh(0, 1, left=-1, color="#ff7e0e", height=0.5)   # orange
     ax.barh(0, 1, left=0,  color='#ffe700', height=0.5)   # gelb
     ax.barh(0, 2, left=1,  color='#36d45c', height=0.5)   # grün
     ax.plot([avg, avg], [-0.25, 0.25], lw=8, color='k')   # Nadel
