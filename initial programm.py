@@ -43,145 +43,336 @@ TEMPLATE = """
 <!doctype html>
 <html lang="de">
 <head>
-<title>Scrum GPT-Team-Assistant</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scrum GPT‑Team‑Assistant</title>
 <style>
-body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: #f7fafd;
-    color: #263238;
-    margin: 0;
-    padding: 0;
+:root{
+  --bg: #0b1020;
+  --panel: #0f1630;
+  --panel-2:#0c132a;
+  --text:#e7ecff;
+  --muted:#aab4d4;
+  --brand:#7aa2ff;
+  --brand-2:#9cd6ff;
+  --ok:#36d45c;
+  --warn:#ffbf00;
+  --bad:#ff5959;
+  --border:#1b2446;
+  --chip:#151c3b;
+  --shadow: 0 12px 30px rgba(41,80,255,0.18);
 }
-.container {
-    max-width: 650px;
-    margin: 35px auto;
-    background: #fff;
-    border-radius: 15px;
-    box-shadow: 0 6px 28px #76a1ff15;
-    padding: 36px 40px 28px 40px;
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:
+   radial-gradient(1200px 800px at -20% -10%, #15214d 0%, transparent 60%),
+   radial-gradient(800px 600px at 120% 30%, #1b2b66 0%, transparent 50%),
+   linear-gradient(180deg,#0a0f20 0%, #080c1a 100%);
+  color:var(--text);
+  font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
-h2 {
-    color: #000;
-    margin-bottom: 18px;
+
+.container{
+  max-width: 980px;
+  margin: 36px auto;
+  padding: 0 16px;
 }
-label {
-    font-size: 1.1em;
-    color: #333;
-    display: block;
-    margin-bottom: 10px;
+
+.header{
+  display:flex; gap:16px; align-items:center; justify-content:space-between;
+  margin-bottom:18px;
 }
-textarea {
-    padding: 16px;
-    border: 2px solid #a0c4ff;
-    border-radius: 15px;
-    width: 100%;
-    height: 120px;
-    font-size: 1.1em;
-    background: #e3f2fd;
-    font-style: italic;
-    color: #555;
-    resize: vertical;
-    box-sizing: border-box;
+.brand{
+  display:flex; gap:12px; align-items:center;
 }
-textarea:focus {
-    font-style: normal;
-    color: #000;
+.logo{
+  width:44px; height:44px; display:grid; place-items:center;
+  background: conic-gradient(from 210deg, #7aa2ff, #9cd6ff, #7aa2ff);
+  border-radius:14px; box-shadow: var(--shadow);
+  color:#0a0f20; font-weight:800; letter-spacing:.5px;
 }
-input[type=submit], button {
-    background: #e3f2fd;
-    color: #000;
-    border: 2px solid #000;
-    border-radius: 10px;
-    padding: 10px 20px;
-    font-size: 1.1em;
-    font-weight: bold;
-    cursor: pointer;
-    margin-left: 10px;
+.hmeta{
+  display:flex; gap:10px; align-items:center; color:var(--muted);
+  font-size:14px;
 }
-hr {
-    margin: 30px 0;
-    border: none;
-    border-top: 2px solid #ccc;
+.switch{
+  appearance:none; width:46px; height:26px; border-radius:30px;
+  background:#1a2445; position:relative; outline:none; cursor:pointer; border:1px solid var(--border);
 }
-.result-box {
-    background: #f6fbff;
-    border-left: 4px solid #8fd1ff;
-    padding: 10px 17px;
-    border-radius: 7px;
-    margin-top: 10px;
-    font-size: 1.08em;
+.switch:after{
+  content:""; position:absolute; inset:3px; width:20px; height:20px; border-radius:20px;
+  background:#b9c9ff; transition:transform .2s ease;
 }
-.result-title {
-    margin-bottom: 5px;
-    color: #3382f7;
-    font-weight: bold;
+.switch:checked:after{ transform: translateX(20px); }
+
+.grid{
+  display:grid; grid-template-columns: 1.2fr .8fr; gap:16px;
 }
-.info {
-    margin-top: 15px;
-    font-size: 0.95em;
-    color: #666;
-    font-style: italic;
+@media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
+
+.card{
+  background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+  border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow: var(--shadow);
 }
-.chat-box {
-    margin-top: 20px;
+
+.card h3{ margin:0 0 10px 0; font-size:18px; letter-spacing:.2px }
+.help{ color:var(--muted); font-size:13px; margin-top:6px }
+
+label{ display:block; font-weight:600; margin:6px 0 8px 4px }
+textarea{
+  width:100%; min-height:120px; resize:vertical; border-radius:12px;
+  border:1px solid var(--border); background:#0b132c; color:var(--text);
+  padding:14px 12px; font-size:15px; outline:none;
+  box-shadow: inset 0 0 0 1px #0f1b3f;
 }
-.chat-message {
-    margin-bottom: 10px;
+textarea:focus{ box-shadow: 0 0 0 2px #7aa2ff55, inset 0 0 0 1px #1f356f; }
+
+.controls{ display:flex; gap:10px; align-items:center; justify-content:flex-end; margin-top:10px }
+.btn{
+  appearance:none; border:none; border-radius:12px; padding:10px 14px;
+  background: linear-gradient(180deg,#7aa2ff,#6b93f2);
+  color:#07112b; font-weight:700; cursor:pointer; box-shadow: var(--shadow);
 }
-.chat-message span {
-    font-weight: bold;
+.btn.secondary{
+  background: #141d3b; color:var(--text); border:1px solid var(--border); font-weight:600;
 }
+.btn[disabled]{ opacity:.6; cursor:not-allowed }
+
+.kpis{ display:flex; gap:10px; flex-wrap:wrap; margin-top:8px }
+.kpi{
+  background: #0b132c; border:1px solid var(--border); border-radius:12px; padding:8px 10px;
+  font-size:13px; color:var(--muted);
+}
+.kpi b{ color:var(--text) }
+
+.divider{ height:1px; background:linear-gradient(90deg, transparent, #31407a, transparent); margin:14px 0 }
+
+.result{
+  background: #0b132c; border:1px solid var(--border); border-radius:12px; padding:12px;
+  font-size:15px;
+}
+.result .title{ color:#9cd6ff; font-weight:700; margin-bottom:6px }
+
+.barometer{
+  display:flex; align-items:center; gap:12px;
+}
+.barometer img{ width:280px; max-width:100% }
+
+.badge{
+  display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
+  background:#111941; border:1px solid var(--border); color:var(--muted); font-size:13px;
+}
+.dot{ width:8px; height:8px; border-radius:8px; display:inline-block; }
+.dot.ok{ background:var(--ok) } .dot.warn{ background:var(--warn) } .dot.bad{ background:var(--bad) }
+
+.chat{
+  display:flex; flex-direction:column; gap:10px; margin-top:10px;
+}
+.msg{ display:flex; gap:10px }
+.msg .bubble{
+  padding:10px 12px; border-radius:12px; max-width:78%;
+  border:1px solid var(--border); background:#0b132c;
+}
+.msg.you{ justify-content:flex-end }
+.msg.you .bubble{ background:#0f1b3f }
+.msg .who{ font-size:12px; color:var(--muted); margin-bottom:4px }
+.small{ font-size:12px; color:var(--muted) }
+
+.footer{ margin-top:20px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; color:var(--muted); font-size:12px }
+
+.toast{
+  position:fixed; right:16px; bottom:16px; background:#0b132c; color:var(--text);
+  border:1px solid var(--border); border-radius:12px; padding:10px 12px; box-shadow: var(--shadow); display:none;
+}
+.loading{ opacity:.8; pointer-events:none }
+.counter{ color:var(--muted); font-size:12px; margin-top:4px; text-align:right }
 </style>
 </head>
 <body>
-<div class="container">
-    <h2>🤖 <b>Scrum GPT-Team-Assistant</b></h2>
-    <form method="POST">
-        <label>Wie ist deine Stimmung heute oder was möchtest du heute an dein Team loswerden?:</label>
-        <textarea name="user_prompt" id="user_prompt" placeholder="Was du hier eingibst, wird gespeichert und hilft deinem Team sich zu verbessern und auf deine Anmerkungen besser eingehen zu können." oninput="checkSubmitBtn();"></textarea>
-        <input type="submit" value="Senden" id="submit_btn" disabled>
-    </form>
-    {% if antwort %}
-        <div class="result-title">GPT Antwort:</div>
-        <div class="result-box">{{ antwort }}</div>
-    {% endif %}
-    <hr>
-    <p><i>Teamstimmung abfragen und mit GPT-Team-Assistant darüber austauschen:</i></p>
-    <form method="POST">
-        <button name="team_check" value="1">Teamstimmung abfragen</button>
-    </form>
-    {% if dash_img %}
-        <div style="margin-bottom:20px;">
-            <img src="data:image/png;base64,{{ dash_img }}" style="width:250px;">
-            <br><small>Teamstimmungsbarometer (letzte 5 Einträge)</small>
+  <div class="container">
+    <div class="header">
+      <div class="brand">
+        <div class="logo">GPT</div>
+        <div>
+          <div style="font-weight:800; letter-spacing:.3px;">Scrum GPT‑Team‑Assistant</div>
+          <div class="hmeta">Privacy‑aware • RAG‑gestützt • Coach‑Modus</div>
         </div>
-    {% endif %}
-    {% if team_antwort %}
-        <div class="result-title">GPT Teamstimmung:</div>
-        <div class="result-box">{{ team_antwort }}</div>
-        <form method="POST">
-            <input type="hidden" name="continue_chat" value="1">
-            <textarea name="follow_up" placeholder="Frage zu dieser Teamstimmung..." style="width:100%;height:60px;margin-top:10px;"></textarea>
-            <input type="submit" value="Absenden">
+      </div>
+      <label title="Reduziert visuelle Effekte" class="badge">
+        <span>Low‑Motion</span>
+        <input id="motionSwitch" class="switch" type="checkbox" />
+      </label>
+    </div>
+
+    <div class="grid">
+      <!-- Left: Eingabe & Teamabfrage -->
+      <div class="card">
+        <h3>Dein Beitrag</h3>
+        <form method="POST" id="formFeedback">
+          <label for="user_prompt">Stimmung / Hinweis an das Team</label>
+          <textarea id="user_prompt" name="user_prompt" placeholder="Kurz & sachlich. Keine personenbezogenen Daten, bitte."></textarea>
+          <div class="counter"><span id="charCount">0</span> Zeichen</div>
+          <div class="controls">
+            <button class="btn secondary" type="button" id="clearDraft">Entwurf löschen</button>
+            <input class="btn" type="submit" value="Senden" id="submit_btn" disabled>
+          </div>
+          <div class="help">Wird anonymisiert in der Vektor‑DB gespeichert (Chunking & Embeddings).</div>
         </form>
-    {% endif %}
-    {% if chat_history %}
-        <div style="margin-top:15px;">
-        {% for msg in chat_history %}
-            <div><b>Du:</b> {{ msg["user"] }}</div>
-            <div><b>GPT:</b> {{ msg["gpt"] }}</div>
-        {% endfor %}
-        </div>
-    {% endif %}
-</div>
+
+        <div class="divider"></div>
+
+        <h3>Teamstimmung</h3>
+        <form method="POST" id="formTeam">
+          <input type="hidden" name="team_check" value="1">
+          <div class="controls">
+            <button class="btn" id="btnTeam" type="submit">Teamstimmung abfragen</button>
+          </div>
+        </form>
+
+        {% if dash_img %}
+          <div class="barometer" style="margin-top:12px">
+            <div class="badge"><span class="dot {% if team_antwort %}ok{% else %}warn{% endif %}"></span> Barometer (letzte 5 Einträge)</div>
+            <img src="data:image/png;base64,{{ dash_img }}" alt="Teamstimmungs‑Barometer">
+          </div>
+        {% endif %}
+
+        {% if antwort %}
+          <div style="margin-top:12px" class="result">
+            <div class="title">Bestätigung</div>
+            <div>{{ antwort }}</div>
+          </div>
+        {% endif %}
+
+        {% if team_antwort %}
+          <div style="margin-top:12px" class="result">
+            <div class="title">GPT Einschätzung zur Teamstimmung</div>
+            <div>{{ team_antwort }}</div>
+          </div>
+
+          <form method="POST" style="margin-top:10px">
+            <input type="hidden" name="continue_chat" value="1">
+            <label for="follow_up">Rückfrage an den Coach</label>
+            <textarea id="follow_up" name="follow_up" placeholder="Kurze Nachfrage, z. B. 'Wie moderieren wir das im Daily?'"></textarea>
+            <div class="controls">
+              <input class="btn" type="submit" value="Absenden">
+            </div>
+          </form>
+        {% endif %}
+      </div>
+
+      <!-- Right: Verlauf -->
+      <div class="card">
+        <h3>Verlauf</h3>
+        {% if chat_history %}
+          <div class="chat" id="chatHistory">
+            {% for msg in chat_history %}
+              <div class="msg you">
+                <div class="bubble">
+                  <div class="who">Du</div>
+                  <div>{{ msg["user"] }}</div>
+                </div>
+              </div>
+              <div class="msg">
+                <div class="bubble">
+                  <div class="who">GPT</div>
+                  <div>{{ msg["gpt"] }}</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="small">Noch keine Unterhaltung. Starte mit <b>Teamstimmung abfragen</b> oder sende einen Beitrag.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="badge"><span class="dot ok"></span> Stable API</span>
+      <span class="badge"><span class="dot warn"></span> Datenschutz gewahrt</span>
+      <span class="badge"><span class="dot bad"></span> Keine Original‑Zitate</span>
+      <span class="small">Build {{  now().strftime("%Y-%m-%d") if false else "" }}</span>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Gespeichert.</div>
+
 <script>
-function checkSubmitBtn() {
-    let txt = document.getElementById("user_prompt").value.trim();
-    document.getElementById("submit_btn").disabled = (txt === "");
-}
-window.onload = function() {
-    checkSubmitBtn();
-}
+(function(){
+  const ta = document.getElementById('user_prompt');
+  const btn = document.getElementById('submit_btn');
+  const count = document.getElementById('charCount');
+  const toast = document.getElementById('toast');
+  const clearBtn = document.getElementById('clearDraft');
+  const formFeedback = document.getElementById('formFeedback');
+  const formTeam = document.getElementById('formTeam');
+  const btnTeam = document.getElementById('btnTeam');
+
+  // Draft aus localStorage
+  const KEY='scrum-gpt-draft';
+  if(ta && localStorage.getItem(KEY)){
+    ta.value = localStorage.getItem(KEY);
+  }
+
+  function updateState(){
+    if(!ta || !btn) return;
+    const v = (ta.value || "").trim();
+    btn.disabled = v.length === 0;
+    count.textContent = v.length;
+  }
+
+  function showToast(msg){
+    if(!toast) return;
+    toast.textContent = msg || 'Gespeichert.';
+    toast.style.display='block';
+    setTimeout(()=> toast.style.display='none', 1800);
+  }
+
+  if(ta){
+    ta.addEventListener('input', ()=>{
+      localStorage.setItem(KEY, ta.value);
+      updateState();
+    });
+    updateState();
+  }
+
+  if(clearBtn){
+    clearBtn.addEventListener('click', ()=>{
+      if(ta){ ta.value=''; localStorage.removeItem(KEY); updateState(); }
+      showToast('Entwurf gelöscht');
+    });
+  }
+
+  // Loading States
+  function setLoading(el, on){
+    if(!el) return;
+    if(on){ el.classList.add('loading'); el.setAttribute('data-prev', el.textContent); el.textContent='Bitte warten…'; }
+    else{ el.classList.remove('loading'); el.textContent = el.getAttribute('data-prev') || el.textContent; el.removeAttribute('data-prev'); }
+  }
+  if(formFeedback){
+    formFeedback.addEventListener('submit', ()=> setLoading(btn, true));
+  }
+  if(formTeam){
+    formTeam.addEventListener('submit', ()=> setLoading(btnTeam, true));
+  }
+
+  // Reduce motion (nur kosmetisch hier)
+  const motion = document.getElementById('motionSwitch');
+  if(motion){
+    const K='scrum-gpt-motion-off';
+    motion.checked = localStorage.getItem(K)==='1';
+    motion.addEventListener('change', ()=>{
+      localStorage.setItem(K, motion.checked?'1':'0');
+      showToast(motion.checked ? 'Bewegung reduziert' : 'Bewegung normal');
+    });
+  }
+
+  // Auto‑scroll zu letztem Chat
+  const ch = document.getElementById('chatHistory');
+  if(ch){ ch.scrollTop = ch.scrollHeight; }
+})();
 </script>
 </body>
 </html>
