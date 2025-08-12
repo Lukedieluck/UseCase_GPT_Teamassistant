@@ -40,7 +40,8 @@ HuggingFace Embeddings (MiniLM-L6-v2)
 ---
 ### 4. Screenshot (POC)
 
-<img width="709" height="1113" alt="image" src="https://github.com/user-attachments/assets/aa3f82af-9317-40a5-9f47-9b534efc5442" />
+<img width="976" height="698" alt="image" src="https://github.com/user-attachments/assets/683b0643-8509-4d9c-8592-ba3e552683b4" />
+
 
 
 ### 5. Prompting
